@@ -1,0 +1,27 @@
+# Example mbsync configuration file for Gmail
+# Copy this file to config/.mbsyncrc and modify as needed
+
+IMAPAccount gmail
+Host imap.gmail.com
+User your.email@gmail.com
+# Use an app-specific password for Gmail
+# See: https://support.google.com/accounts/answer/185833
+Pass your_app_specific_password
+Port 993
+SSLType IMAPS
+AuthMechs LOGIN
+
+IMAPStore gmail-remote
+Account gmail
+
+MaildirStore gmail-local
+Path /mail/
+Inbox /mail/INBOX
+SubFolders Verbatim
+
+Channel gmail
+Far :gmail-remote:
+Near :gmail-local:
+Patterns *
+Create Near
+SyncState *

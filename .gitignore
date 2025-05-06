@@ -1,0 +1,6 @@
+.direnv/
+
+.env
+
+mail/
+config/

@@ -1,0 +1,19 @@
+# Example notmuch configuration file
+# Copy this file to config/notmuch/config and modify as needed
+
+[database]
+path=/mail
+
+[user]
+name=Your Name
+primary_email=your.email@example.com
+
+[new]
+tags=new;unread;inbox;
+ignore=
+
+[search]
+exclude_tags=deleted;spam;
+
+[maildir]
+synchronize_flags=true

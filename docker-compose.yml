@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  mail-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ${NOTMUCH_DB_PATH:-./mail}:/mail
+      - ${CONFIG_PATH:-./config}:/config
+    environment:
+      - SYNC_FREQUENCY=${SYNC_FREQUENCY:-15m}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD:-}
+      - NOTMUCH_CONFIG=/config/notmuch/config
+    restart: unless-stopped
