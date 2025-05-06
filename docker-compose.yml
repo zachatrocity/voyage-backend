@@ -1,7 +1,10 @@
 version: '3.8'
 
 services:
-  voyage:
+  # optional notmuch mail container
+  # if you already have notmuch configured or running
+  # on your host you can omit this service
+  voyage-mail:
     build:
       context: .
       dockerfile: Dockerfile
@@ -13,3 +16,4 @@ services:
       - EMAIL_PASSWORD=${EMAIL_PASSWORD:-}
       - NOTMUCH_CONFIG=/config/notmuch/config
     restart: unless-stopped
+  # voyage api container tbd
