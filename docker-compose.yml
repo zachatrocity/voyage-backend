@@ -16,4 +16,20 @@ services:
       - EMAIL_PASSWORD=${EMAIL_PASSWORD:-}
       - NOTMUCH_CONFIG=/config/notmuch/config
     restart: unless-stopped
-  # voyage api container tbd
+
+  # API service for searching notmuch database
+  voyage-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "${API_PORT:-8080}:8080"
+    volumes:
+      - ${NOTMUCH_DB_PATH:-./mail}:/mail
+    environment:
+      - PORT=8080
+      - NOTMUCH_DATABASE=/mail
+      - NOTMUCH_CONFIG=/config/notmuch/config
+    depends_on: # remove if bringing your own notmuch db
+      - voyage-mail
+    restart: unless-stopped

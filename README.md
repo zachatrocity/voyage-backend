@@ -18,5 +18,12 @@ Voyage consists of several key components:
 
 1. **Email Fetching Service**: Uses mbsync to retrieve emails from your accounts
 2. **Notmuch Integration**: Indexes and tags emails for efficient searching
+3. **REST API**: Simple Go API for searching the notmuch database
 
+## API Usage
 
+Search the notmuch database:
+```
+GET /api/v1/search?q=airbnb
+GET /api/v1/emails/{message_id}
+```
