@@ -1,6 +1,11 @@
-# Voyage
+<div align="center">
+  
+# ✉️ Voyage ✈️
 
-A notmuch travel plan aggregator that searches through your email to identify and organize travel-related information.
+
+A (WIP) notmuch travel plan aggregator that searches through your email to identify and organize travel-related information.
+
+</div>
 
 ## Overview
 
