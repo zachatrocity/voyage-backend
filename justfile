@@ -49,6 +49,10 @@ count:
 index:
     docker-compose exec voyage-mail notmuch new
 
+# Generate Swagger documentation
+swagger:
+    swag init -g cmd/api/main.go
+
 # Rebuild and restart the containers
 restart: down build up
     just logs

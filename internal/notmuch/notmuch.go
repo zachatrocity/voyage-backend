@@ -10,20 +10,22 @@ import (
 )
 
 // EmailResult represents a single email search result
+// @Description Email search result
 type EmailResult struct {
-	MessageID string    `json:"message_id"`
-	ThreadID  string    `json:"thread_id"`
-	Date      time.Time `json:"date"`
-	From      string    `json:"from"`
-	Subject   string    `json:"subject"`
-	Tags      []string  `json:"tags"`
-	Filename  string    `json:"filename"`
+	MessageID string    `json:"message_id" example:"<12345@example.com>"`
+	ThreadID  string    `json:"thread_id" example:"thread123"`
+	Date      time.Time `json:"date" example:"2023-01-01T12:00:00Z"`
+	From      string    `json:"from" example:"sender@example.com"`
+	Subject   string    `json:"subject" example:"Flight Confirmation"`
+	Tags      []string  `json:"tags" example:"travel,flight"`
+	Filename  string    `json:"filename" example:"/path/to/email.eml"`
 }
 
 // SearchResults represents the results of a search query
+// @Description Search results containing matching emails
 type SearchResults struct {
-	Query   string        `json:"query"`
-	Count   int           `json:"count"`
+	Query   string        `json:"query" example:"subject:flight"`
+	Count   int           `json:"count" example:"42"`
 	Results []EmailResult `json:"results"`
 }
 
@@ -105,28 +107,9 @@ func Search(query string, limitStr string) (*SearchResults, error) {
 			continue
 		}
 
-		// Get message date
-		timestamp, _ := msg.GetDate()
-		date := time.Unix(timestamp, 0)
-
-		// Get tags
-		tags := []string{}
-		msgTags := msg.GetTags()
-		for msgTags.Valid() {
-			tags = append(tags, msgTags.Get())
-			msgTags.MoveToNext()
-		}
-
-		// Add to results
-		results.Results = append(results.Results, EmailResult{
-			MessageID: msg.GetMessageId(),
-			ThreadID:  msg.GetThreadId(),
-			Date:      date,
-			From:      msg.GetHeader("from"),
-			Subject:   msg.GetHeader("subject"),
-			Tags:      tags,
-			Filename:  msg.GetFileName(),
-		})
+		// Create email result using helper function and add to results
+		emailResult := createEmailResultFromMessage(msg)
+		results.Results = append(results.Results, *emailResult)
 
 		messages.MoveToNext()
 		i++
@@ -154,6 +137,43 @@ func GetEmail(messageID string) (*EmailResult, error) {
 	}
 	defer msg.Destroy()
 
+	// Create result using helper function
+	result := createEmailResultFromMessage(msg)
+
+	return result, nil
+}
+
+// TagEmail sets a tag on a particular messageID email
+func TagEmail(messageID string, tag string) (*EmailResult, error) {
+	// Open the database
+	db, status := notmuch.OpenDatabase(GetDatabasePath(), notmuch.DATABASE_MODE_READ_WRITE)
+	if status != notmuch.STATUS_SUCCESS {
+		return nil, fmt.Errorf("failed to open notmuch database: %s", status)
+	}
+	defer db.Close()
+
+	// Find the message
+	msg, status := db.FindMessage(messageID)
+	if status != notmuch.STATUS_SUCCESS {
+		return nil, fmt.Errorf("failed to find message: %s", status)
+	}
+	if msg == nil {
+		return nil, nil // Message not found
+	}
+	defer msg.Destroy()
+
+	tagStatus := msg.AddTag(tag)
+	if tagStatus != notmuch.STATUS_SUCCESS {
+		return nil, fmt.Errorf("failed to add tag: %s", status)
+	}
+
+	result := createEmailResultFromMessage(msg)
+
+	return result, nil
+}
+
+// createEmailResultFromMessage creates an EmailResult from a notmuch Message
+func createEmailResultFromMessage(msg *notmuch.Message) *EmailResult {
 	// Get message date
 	timestamp, _ := msg.GetDate()
 	date := time.Unix(timestamp, 0)
@@ -167,7 +187,7 @@ func GetEmail(messageID string) (*EmailResult, error) {
 	}
 
 	// Create result
-	result := &EmailResult{
+	return &EmailResult{
 		MessageID: msg.GetMessageId(),
 		ThreadID:  msg.GetThreadId(),
 		Date:      date,
@@ -176,6 +196,4 @@ func GetEmail(messageID string) (*EmailResult, error) {
 		Tags:      tags,
 		Filename:  msg.GetFileName(),
 	}
-
-	return result, nil
 }

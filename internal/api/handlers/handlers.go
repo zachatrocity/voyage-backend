@@ -8,7 +8,14 @@ import (
 	"github.com/zachatrocity/voyage/internal/notmuch"
 )
 
-// HealthCheck provides a simple health check endpoint
+// HealthCheck godoc
+// @Summary Health check endpoint
+// @Description Get the health status of the API and database connection
+// @Tags health
+// @Accept json
+// @Produce json
+// @Success 200 {object} map[string]interface{}
+// @Router /health [get]
 func HealthCheck(c echo.Context) error {
 	// Check if notmuch database is accessible
 	dbStatus := "ok"
@@ -24,7 +31,18 @@ func HealthCheck(c echo.Context) error {
 	})
 }
 
-// Search handles simple search queries against the notmuch database
+// Search godoc
+// @Summary Search emails
+// @Description Search for emails using notmuch query
+// @Tags search
+// @Accept json
+// @Produce json
+// @Param q query string true "Search query"
+// @Param limit query string false "Result limit" default(50)
+// @Success 200 {object} notmuch.SearchResults
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /search [get]
 func Search(c echo.Context) error {
 	// Get query parameter
 	query := c.QueryParam("q")
@@ -51,7 +69,18 @@ func Search(c echo.Context) error {
 	return c.JSON(http.StatusOK, results)
 }
 
-// GetEmail retrieves a single email by its message ID
+// GetEmail godoc
+// @Summary Get email by ID
+// @Description Retrieve a single email by its message ID
+// @Tags emails
+// @Accept json
+// @Produce json
+// @Param id path string true "Message ID"
+// @Success 200 {object} notmuch.EmailResult
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /emails/{id} [get]
 func GetEmail(c echo.Context) error {
 	// Get message ID from URL parameter
 	messageID := c.Param("id")
@@ -77,4 +106,59 @@ func GetEmail(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, email)
+}
+
+// TagEmail godoc
+// @Summary Tag an email
+// @Description Add a tag to an email by its message ID
+// @Tags emails
+// @Accept json
+// @Produce json
+// @Param id path string true "Message ID"
+// @Param tag path string true "Tag to add"
+// @Success 200 {object} notmuch.EmailResult
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /emails/{id}/tags/{tag} [post]
+func TagEmail(c echo.Context) error {
+	// Get message ID from URL parameter
+	messageID := c.Param("id")
+	if messageID == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Message ID is required",
+		})
+	}
+
+	// Get message tag from URL parameter
+	tag := c.Param("tag")
+	if tag == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "tag is required",
+		})
+	}
+
+	// Get email details
+	email, err := notmuch.GetEmail(messageID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Failed to retrieve email: " + err.Error(),
+		})
+	}
+
+	// Check if email was found
+	if email == nil {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error": "Email not found",
+		})
+	}
+
+	taggedEmail, err := notmuch.TagEmail(messageID, tag)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Failed to tag email: " + err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, taggedEmail)
 }

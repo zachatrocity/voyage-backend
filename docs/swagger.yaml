@@ -1,0 +1,196 @@
+basePath: /api/v1
+definitions:
+  notmuch.EmailResult:
+    description: Email search result
+    properties:
+      date:
+        example: "2023-01-01T12:00:00Z"
+        type: string
+      filename:
+        example: /path/to/email.eml
+        type: string
+      from:
+        example: sender@example.com
+        type: string
+      message_id:
+        example: <12345@example.com>
+        type: string
+      subject:
+        example: Flight Confirmation
+        type: string
+      tags:
+        example:
+        - travel
+        - flight
+        items:
+          type: string
+        type: array
+      thread_id:
+        example: thread123
+        type: string
+    type: object
+  notmuch.SearchResults:
+    description: Search results containing matching emails
+    properties:
+      count:
+        example: 42
+        type: integer
+      query:
+        example: subject:flight
+        type: string
+      results:
+        items:
+          $ref: '#/definitions/notmuch.EmailResult'
+        type: array
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+  description: A self-hosted travel plan aggregator that searches through emails
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Voyage API
+  version: "1.0"
+paths:
+  /emails/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a single email by its message ID
+      parameters:
+      - description: Message ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/notmuch.EmailResult'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get email by ID
+      tags:
+      - emails
+  /emails/{id}/tags/{tag}:
+    post:
+      consumes:
+      - application/json
+      description: Add a tag to an email by its message ID
+      parameters:
+      - description: Message ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Tag to add
+        in: path
+        name: tag
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/notmuch.EmailResult'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Tag an email
+      tags:
+      - emails
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Get the health status of the API and database connection
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Health check endpoint
+      tags:
+      - health
+  /search:
+    get:
+      consumes:
+      - application/json
+      description: Search for emails using notmuch query
+      parameters:
+      - description: Search query
+        in: query
+        name: q
+        required: true
+        type: string
+      - default: "50"
+        description: Result limit
+        in: query
+        name: limit
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/notmuch.SearchResults'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Search emails
+      tags:
+      - search
+swagger: "2.0"
