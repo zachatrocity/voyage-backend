@@ -1,20 +1,17 @@
 <div align="center">
   
-# ✉️ Voyage ✈️
-
-
-A (WIP) notmuch travel plan aggregator that searches through your email to identify and organize travel-related information.
+# Voyage (Backend)
 
 </div>
 
 ## Overview
 
-Voyage is designed to simplify travel planning by automatically aggregating confirmation emails and itineraries from your inbox and tagging them with `notmuch`. The goal is a consolidated view of your travel plans, making it easy to keep track of flights, accommodations, car rentals, and other travel arrangements.
+This repository contains the backend for Voyage, a self-hosted travel plan aggregator. The backend is responsible for processing emails using notmuch and mbsync, and providing a REST API for accessing and organizing travel-related information.
 
 ## Features
 
 - **Email Integration**: Automatically scans and processes travel-related emails (WIP)
-- **Trip Organization**: Groups related travel items into coherent trips (WIP)
+- **Trip Organization**: Provides data and tagging capabilities for organizing related travel items into coherent trips (WIP)
 - **Self-Hosted**: Full control over your data with Docker-based deployment
 
 ## Architecture
