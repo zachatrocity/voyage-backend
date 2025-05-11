@@ -102,7 +102,7 @@ func Search(query string, limitStr string, sortType SortType) (*SearchResults, e
 	q.SetSort(notmuchSort)
 
 	// Log the sort order for debugging
-	fmt.Printf("Search with query: %s, sort type: %d, notmuch sort: %d\n", query, sortType, notmuchSort)
+	fmt.Printf("Search with query: %s notmuch sort: %d\n", query, notmuchSort)
 
 	// Execute the query
 	var messages *notmuch.Messages

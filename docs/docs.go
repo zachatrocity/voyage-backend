@@ -23,7 +23,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/emails/{id}": {
+        "/email/{id}": {
             "get": {
                 "description": "Retrieve a single email by its message ID",
                 "consumes": [
@@ -33,13 +33,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "emails"
+                    "email"
                 ],
                 "summary": "Get email by ID",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Message ID",
+                        "description": "Thread ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -82,7 +82,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/emails/{id}/tags/{tag}": {
+        "/email/{id}/tags/{tag}": {
             "post": {
                 "description": "Add a tag to an email by its message ID",
                 "consumes": [
@@ -92,7 +92,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "emails"
+                    "email"
                 ],
                 "summary": "Tag an email",
                 "parameters": [

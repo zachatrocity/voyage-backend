@@ -9,12 +9,12 @@ A (WIP) notmuch travel plan aggregator that searches through your email to ident
 
 ## Overview
 
-Voyage is designed to simplify travel planning by automatically aggregating confirmation emails and itineraries from your inbox. It creates a consolidated view of your travel plans, making it easy to keep track of flights, accommodations, car rentals, and other travel arrangements.
+Voyage is designed to simplify travel planning by automatically aggregating confirmation emails and itineraries from your inbox and tagging them with `notmuch`. The goal is a consolidated view of your travel plans, making it easy to keep track of flights, accommodations, car rentals, and other travel arrangements.
 
 ## Features
 
-- **Email Integration**: Automatically scans and processes travel-related emails
-- **Trip Organization**: Groups related travel items into coherent trips
+- **Email Integration**: Automatically scans and processes travel-related emails (WIP)
+- **Trip Organization**: Groups related travel items into coherent trips (WIP)
 - **Self-Hosted**: Full control over your data with Docker-based deployment
 
 ## Architecture
@@ -33,4 +33,5 @@ GET /api/v1/search?q=airbnb
 GET /api/v1/emails/{message_id}
 GET /api/v1/search?q=subject:flight` (default, sorts by newest_first)
 GET /api/v1/search?q=subject:flight&sort=oldest_first`
+GET /api/v1/search?q=tag:my-trip`
 ```

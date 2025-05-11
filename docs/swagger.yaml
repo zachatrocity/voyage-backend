@@ -56,13 +56,13 @@ info:
   title: Voyage API
   version: "1.0"
 paths:
-  /emails/{id}:
+  /email/{id}:
     get:
       consumes:
       - application/json
       description: Retrieve a single email by its message ID
       parameters:
-      - description: Message ID
+      - description: Thread ID
         in: path
         name: id
         required: true
@@ -94,8 +94,8 @@ paths:
             type: object
       summary: Get email by ID
       tags:
-      - emails
-  /emails/{id}/tags/{tag}:
+      - email
+  /email/{id}/tags/{tag}:
     post:
       consumes:
       - application/json
@@ -138,7 +138,7 @@ paths:
             type: object
       summary: Tag an email
       tags:
-      - emails
+      - email
   /health:
     get:
       consumes:

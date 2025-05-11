@@ -87,15 +87,15 @@ func Search(c echo.Context) error {
 // GetEmail godoc
 // @Summary Get email by ID
 // @Description Retrieve a single email by its message ID
-// @Tags emails
+// @Tags email
 // @Accept json
 // @Produce json
-// @Param id path string true "Message ID"
+// @Param id path string true "Thread ID"
 // @Success 200 {object} notmuch.EmailResult
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /emails/{id} [get]
+// @Router /email/{id} [get]
 func GetEmail(c echo.Context) error {
 	// Get message ID from URL parameter
 	messageID := c.Param("id")
@@ -126,7 +126,7 @@ func GetEmail(c echo.Context) error {
 // TagEmail godoc
 // @Summary Tag an email
 // @Description Add a tag to an email by its message ID
-// @Tags emails
+// @Tags email
 // @Accept json
 // @Produce json
 // @Param id path string true "Message ID"
@@ -135,7 +135,7 @@ func GetEmail(c echo.Context) error {
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /emails/{id}/tags/{tag} [post]
+// @Router /email/{id}/tags/{tag} [post]
 func TagEmail(c echo.Context) error {
 	// Get message ID from URL parameter
 	messageID := c.Param("id")
