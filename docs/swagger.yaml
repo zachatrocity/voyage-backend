@@ -171,6 +171,11 @@ paths:
         in: query
         name: limit
         type: string
+      - default: newest_first
+        description: Sort order (oldest_first, newest_first)
+        in: query
+        name: sort
+        type: string
       produces:
       - application/json
       responses:

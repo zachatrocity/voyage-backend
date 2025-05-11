@@ -51,8 +51,22 @@ func CheckDatabaseConnection() error {
 	return nil
 }
 
+// SortType represents the sort order for search results
+type SortType int
+
+const (
+	// SortOldestFirst sorts messages with oldest first
+	SortOldestFirst SortType = iota
+	// SortNewestFirst sorts messages with newest first
+	SortNewestFirst
+	// SortMessageID sorts messages by message ID
+	SortMessageID
+	// SortUnsorted does not apply any sorting
+	SortUnsorted
+)
+
 // Search performs a search against the notmuch database
-func Search(query string, limitStr string) (*SearchResults, error) {
+func Search(query string, limitStr string, sortType SortType) (*SearchResults, error) {
 	// Convert limit to int
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil {
@@ -73,8 +87,22 @@ func Search(query string, limitStr string) (*SearchResults, error) {
 	}
 	defer q.Destroy()
 
-	// Set sort order to newest first
-	q.SetSort(notmuch.SORT_NEWEST_FIRST)
+	// Map our SortType to notmuch.Sort
+	var notmuchSort notmuch.Sort
+	switch sortType {
+	case SortOldestFirst:
+		notmuchSort = 0
+	case SortNewestFirst:
+		notmuchSort = 1
+	default:
+		notmuchSort = 1 // Default to newest first
+	}
+
+	// Set the sort order
+	q.SetSort(notmuchSort)
+
+	// Log the sort order for debugging
+	fmt.Printf("Search with query: %s, sort type: %d, notmuch sort: %d\n", query, sortType, notmuchSort)
 
 	// Execute the query
 	var messages *notmuch.Messages

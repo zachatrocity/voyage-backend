@@ -199,6 +199,13 @@ const docTemplate = `{
                         "description": "Result limit",
                         "name": "limit",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "newest_first",
+                        "description": "Sort order (oldest_first, newest_first)",
+                        "name": "sort",
+                        "in": "query"
                     }
                 ],
                 "responses": {

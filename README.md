@@ -31,4 +31,6 @@ Search the notmuch database:
 ```
 GET /api/v1/search?q=airbnb
 GET /api/v1/emails/{message_id}
+GET /api/v1/search?q=subject:flight` (default, sorts by newest_first)
+GET /api/v1/search?q=subject:flight&sort=oldest_first`
 ```

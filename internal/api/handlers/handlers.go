@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"time"
 
@@ -39,6 +40,7 @@ func HealthCheck(c echo.Context) error {
 // @Produce json
 // @Param q query string true "Search query"
 // @Param limit query string false "Result limit" default(50)
+// @Param sort query string false "Sort order (oldest_first, newest_first)" default(newest_first)
 // @Success 200 {object} notmuch.SearchResults
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
@@ -58,8 +60,21 @@ func Search(c echo.Context) error {
 		limit = "50"
 	}
 
+	// Get optional sort parameter
+	sortParam := c.QueryParam("sort")
+	var sortType notmuch.SortType
+	switch sortParam {
+	case "oldest_first":
+		sortType = notmuch.SortOldestFirst
+	default:
+		sortType = notmuch.SortNewestFirst // Default to newest first
+	}
+
+	// Log the sort parameter for debugging
+	log.Printf("Search request with query: %s, sort param: %s, sort type: %d", query, sortParam, sortType)
+
 	// Perform search
-	results, err := notmuch.Search(query, limit)
+	results, err := notmuch.Search(query, limit, sortType)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": "Failed to search emails: " + err.Error(),
