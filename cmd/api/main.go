@@ -24,6 +24,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/zachatrocity/voyage/docs" // Import generated docs
 	"github.com/zachatrocity/voyage/internal/api/handlers"
+	voyagemiddleware "github.com/zachatrocity/voyage/internal/api/middleware"
 )
 
 func main() {
@@ -54,8 +55,17 @@ func main() {
 		return c.HTML(http.StatusOK, htmlContent)
 	})
 
+	// API key auth
+	apiKey := os.Getenv("VOYAGE_API_KEY")
+	if apiKey != "" {
+		log.Printf("API key authentication enabled")
+	} else {
+		log.Printf("API key authentication disabled (set VOYAGE_API_KEY to enable)")
+	}
+
 	// API v1 group
 	v1 := e.Group("/api/v1")
+	v1.Use(voyagemiddleware.APIKeyMiddleware(apiKey))
 	{
 		e.GET("/health", handlers.HealthCheck)
 
