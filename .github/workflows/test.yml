@@ -25,5 +25,5 @@ jobs:
 
       - name: Verify swagger docs are up to date
         run: |
-          swag init -g cmd/api/main.go
+          swag init -g cmd/api/main.go -o docs/
           git diff --exit-code docs/ || (echo "Swagger docs are out of date — run 'just swagger' and commit the updated docs/" && exit 1)
