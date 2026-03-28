@@ -9,7 +9,7 @@
 // @license.name MIT
 // @license.url https://opensource.org/licenses/MIT
 
-// @host localhost:8080
+// @host localhost:8181
 // @BasePath /api/v1
 package main
 
@@ -18,6 +18,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	scalar "github.com/MarceloPetrucio/go-scalar-api-reference"
 	"github.com/labstack/echo/v4"
@@ -26,14 +27,66 @@ import (
 	"github.com/zachatrocity/voyage/internal/api/handlers"
 )
 
+// Config holds all configuration for the Voyage API server.
+type Config struct {
+	Port              string // VOYAGE_PORT (default "8181")
+	AllowedOrigins    string // VOYAGE_ALLOWED_ORIGINS (comma-separated)
+	MailDir           string // VOYAGE_MAIL_DIR
+	NotmuchConfig     string // VOYAGE_NOTMUCH_CONFIG
+	TripsDatabasePath string // VOYAGE_TRIPS_DB (default "./trips.json")
+	ClassifiersPath   string // VOYAGE_CLASSIFIERS (default "./configs/classifiers.yaml")
+	SyncCmd           string // VOYAGE_SYNC_CMD (default "./scripts/sync-mail.sh")
+	APIKey            string // VOYAGE_API_KEY (empty = auth disabled)
+}
+
+func loadConfig() Config {
+	return Config{
+		Port:              getEnvOrDefault("VOYAGE_PORT", "8181"),
+		AllowedOrigins:    os.Getenv("VOYAGE_ALLOWED_ORIGINS"),
+		MailDir:           os.Getenv("VOYAGE_MAIL_DIR"),
+		NotmuchConfig:     os.Getenv("VOYAGE_NOTMUCH_CONFIG"),
+		TripsDatabasePath: getEnvOrDefault("VOYAGE_TRIPS_DB", "./trips.json"),
+		ClassifiersPath:   getEnvOrDefault("VOYAGE_CLASSIFIERS", "./configs/classifiers.yaml"),
+		SyncCmd:           getEnvOrDefault("VOYAGE_SYNC_CMD", "./scripts/sync-mail.sh"),
+		APIKey:            os.Getenv("VOYAGE_API_KEY"),
+	}
+}
+
+func getEnvOrDefault(key, defaultVal string) string {
+	if val := os.Getenv(key); val != "" {
+		return val
+	}
+	return defaultVal
+}
+
 func main() {
+	cfg := loadConfig()
+
+	// Log loaded configuration
+	apiKeyStatus := "disabled"
+	if cfg.APIKey != "" {
+		apiKeyStatus = "enabled (set)"
+	}
+	log.Printf("Voyage config: port=%s mail_dir=%s notmuch_config=%s trips_db=%s classifiers=%s sync_cmd=%s api_key=%s",
+		cfg.Port, cfg.MailDir, cfg.NotmuchConfig, cfg.TripsDatabasePath, cfg.ClassifiersPath, cfg.SyncCmd, apiKeyStatus)
+
 	// Create a new Echo instance
 	e := echo.New()
 
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	e.Use(middleware.CORS())
+
+	// CORS configuration
+	origins := []string{"http://localhost:8080", "http://localhost:1234", "http://localhost:8181"}
+	if cfg.AllowedOrigins != "" {
+		origins = strings.Split(cfg.AllowedOrigins, ",")
+	}
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: origins,
+		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodOptions},
+		AllowHeaders: []string{echo.HeaderContentType, echo.HeaderAccept, "X-API-Key"},
+	}))
 
 	// Serve Swagger JSON file
 	e.Static("/swagger", "./docs")
@@ -69,15 +122,9 @@ func main() {
 		v1.POST("/email/:id/tags/:tag", handlers.TagEmail)
 	}
 
-	// Get port from environment or use default
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
 	// Start the server
-	log.Printf("Starting server on port %s", port)
-	if err := e.Start(":" + port); err != nil && err != http.ErrServerClosed {
+	log.Printf("Starting server on port %s", cfg.Port)
+	if err := e.Start(":" + cfg.Port); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 }
