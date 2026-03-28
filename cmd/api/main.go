@@ -35,9 +35,6 @@ func main() {
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
 
-	// Routes
-	e.GET("/health", handlers.HealthCheck)
-
 	// Serve Swagger JSON file
 	e.Static("/swagger", "./docs")
 
@@ -60,6 +57,8 @@ func main() {
 	// API v1 group
 	v1 := e.Group("/api/v1")
 	{
+		e.GET("/health", handlers.HealthCheck)
+
 		// Search endpoint
 		v1.GET("/search", handlers.Search)
 
