@@ -166,3 +166,7 @@ mbsync → local Maildir → notmuch index → voyage-api → Voyage app
 ```
 
 No cloud. No OAuth. No third-party APIs. Your email never leaves your machine.
+
+---
+
+<div align="center">🤙 built with vibes 🤙</div>
