@@ -43,7 +43,7 @@ definitions:
           $ref: '#/definitions/notmuch.EmailResult'
         type: array
     type: object
-host: localhost:8080
+host: localhost:8181
 info:
   contact:
     email: support@example.com

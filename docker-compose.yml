@@ -23,13 +23,23 @@ services:
       context: .
       dockerfile: Dockerfile.api
     ports:
-      - "${API_PORT:-8181}:8080"
+      - "${API_PORT:-8181}:8181"
     volumes:
       - ${NOTMUCH_DB_PATH:-./mail}:/mail
+      - ${VOYAGE_NOTMUCH_CONFIG:-./config/notmuch/config}:/config/notmuch/config:ro
+      - ${VOYAGE_CLASSIFIERS:-./configs/classifiers.yaml}:/app/configs/classifiers.yaml:ro
+      - ${VOYAGE_TRIPS_DB:-./trips.json}:/app/trips.json
+    env_file:
+      - .env
     environment:
-      - PORT=8080
-      - NOTMUCH_DATABASE=/mail
-      - NOTMUCH_CONFIG=/config/notmuch/config
+      - VOYAGE_PORT=8181
+      - VOYAGE_MAIL_DIR=/mail
+      - VOYAGE_NOTMUCH_CONFIG=/config/notmuch/config
+      - VOYAGE_TRIPS_DB=/app/trips.json
+      - VOYAGE_CLASSIFIERS=/app/configs/classifiers.yaml
+      - VOYAGE_SYNC_CMD=${VOYAGE_SYNC_CMD:-./scripts/sync-mail.sh}
+      - VOYAGE_ALLOWED_ORIGINS=${VOYAGE_ALLOWED_ORIGINS:-}
+      - VOYAGE_API_KEY=${VOYAGE_API_KEY:-}
     depends_on: # remove if bringing your own notmuch db
       - voyage-mail
     restart: unless-stopped
