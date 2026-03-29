@@ -1,0 +1,29 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: Install libnotmuch-dev
+        run: sudo apt-get update && sudo apt-get install -y libnotmuch-dev
+
+      - name: Install swag
+        run: go install github.com/swaggo/swag/cmd/swag@latest
+
+      - name: Run tests
+        run: go test ./...
+
+      - name: Verify swagger docs are up to date
+        run: |
+          swag init -g cmd/api/main.go -o docs/
+          git diff --exit-code docs/ || (echo "Swagger docs are out of date — run 'just swagger' and commit the updated docs/" && exit 1)
