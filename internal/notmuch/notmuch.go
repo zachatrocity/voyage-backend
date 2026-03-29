@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/zachatrocity/voyage/notmuch"
@@ -196,6 +197,106 @@ func TagEmail(messageID string, tag string) (*EmailResult, error) {
 	}
 
 	result := createEmailResultFromMessage(msg)
+
+	return result, nil
+}
+
+// RemoveTag removes a tag from a particular messageID email
+func RemoveTag(messageID string, tag string) (*EmailResult, error) {
+	// Open the database
+	db, status := notmuch.OpenDatabase(GetDatabasePath(), notmuch.DATABASE_MODE_READ_WRITE)
+	if status != notmuch.STATUS_SUCCESS {
+		return nil, fmt.Errorf("failed to open notmuch database: %s", status)
+	}
+	defer db.Close()
+
+	// Find the message
+	msg, status := db.FindMessage(messageID)
+	if status != notmuch.STATUS_SUCCESS {
+		return nil, fmt.Errorf("failed to find message: %s", status)
+	}
+	if msg == nil {
+		return nil, nil // Message not found
+	}
+	defer msg.Destroy()
+
+	tagStatus := msg.RemoveTag(tag)
+	if tagStatus != notmuch.STATUS_SUCCESS {
+		return nil, fmt.Errorf("failed to remove tag: %s", tagStatus)
+	}
+
+	result := createEmailResultFromMessage(msg)
+
+	return result, nil
+}
+
+// GetEmailTags retrieves the tags for a particular messageID email without modifying them
+func GetEmailTags(messageID string) ([]string, error) {
+	// Open the database
+	db, status := notmuch.OpenDatabase(GetDatabasePath(), notmuch.DATABASE_MODE_READ_ONLY)
+	if status != notmuch.STATUS_SUCCESS {
+		return nil, fmt.Errorf("failed to open notmuch database: %s", status)
+	}
+	defer db.Close()
+
+	// Find the message
+	msg, status := db.FindMessage(messageID)
+	if status != notmuch.STATUS_SUCCESS {
+		return nil, fmt.Errorf("failed to find message: %s", status)
+	}
+	if msg == nil {
+		return nil, nil // Message not found
+	}
+	defer msg.Destroy()
+
+	tags := []string{}
+	msgTags := msg.GetTags()
+	for msgTags.Valid() {
+		tags = append(tags, msgTags.Get())
+		msgTags.MoveToNext()
+	}
+
+	return tags, nil
+}
+
+// FilterTripTags returns only tags that have the "trip:" prefix from a tag list.
+// This is exported for unit testing the tag-filtering logic without a live DB.
+func FilterTripTags(tags []string) []string {
+	var tripTags []string
+	for _, tag := range tags {
+		if strings.HasPrefix(tag, "trip:") {
+			tripTags = append(tripTags, tag)
+		}
+	}
+	return tripTags
+}
+
+// ReplaceTripTag removes any existing trip:* tags from the email and applies trip:{newTripID}.
+// Returns the updated EmailResult.
+func ReplaceTripTag(messageID, newTripID string) (*EmailResult, error) {
+	// Get current tags
+	tags, err := GetEmailTags(messageID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get email tags: %w", err)
+	}
+	if tags == nil {
+		return nil, nil // Message not found
+	}
+
+	// Remove existing trip:* tags
+	existingTripTags := FilterTripTags(tags)
+	for _, tag := range existingTripTags {
+		_, err := RemoveTag(messageID, tag)
+		if err != nil {
+			return nil, fmt.Errorf("failed to remove tag %q: %w", tag, err)
+		}
+	}
+
+	// Add the new trip tag
+	result, err := TagEmail(messageID, "trip:"+newTripID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to add trip tag: %w", err)
+	}
 
 	return result, nil
 }
