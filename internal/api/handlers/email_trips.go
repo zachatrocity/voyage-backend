@@ -15,10 +15,22 @@ type associateTripEmailResponse struct {
 	Tags      []string `json:"tags" example:"inbox,trip:2026-cruise,travel"`
 }
 
+// TripEmailItem mirrors notmuch.EmailResult for Swagger doc generation.
+// @Description An email associated with a trip
+type TripEmailItem struct {
+	MessageID string   `json:"message_id"`
+	ThreadID  string   `json:"thread_id"`
+	Date      string   `json:"date"`
+	From      string   `json:"from"`
+	Subject   string   `json:"subject"`
+	Tags      []string `json:"tags"`
+	Filename  string   `json:"filename"`
+}
+
 // tripEmailsResponse is the JSON shape returned when listing emails for a trip.
 type tripEmailsResponse struct {
-	TripID string                      `json:"trip_id" example:"2026-cruise"`
-	Emails []voyagenotmuch.EmailResult `json:"emails"`
+	TripID string          `json:"trip_id" example:"2026-cruise"`
+	Emails []TripEmailItem `json:"emails"`
 }
 
 // AssociateTripEmail godoc
@@ -105,13 +117,21 @@ func (h *TripHandler) ListTripEmails(c echo.Context) error {
 		})
 	}
 
-	emails := results.Results
-	if emails == nil {
-		emails = []voyagenotmuch.EmailResult{}
+	items := make([]TripEmailItem, 0, len(results.Results))
+	for _, e := range results.Results {
+		items = append(items, TripEmailItem{
+			MessageID: e.MessageID,
+			ThreadID:  e.ThreadID,
+			Date:      e.Date.Format("2006-01-02T15:04:05Z07:00"),
+			From:      e.From,
+			Subject:   e.Subject,
+			Tags:      e.Tags,
+			Filename:  e.Filename,
+		})
 	}
 
 	return c.JSON(http.StatusOK, tripEmailsResponse{
 		TripID: tripID,
-		Emails: emails,
+		Emails: items,
 	})
 }
