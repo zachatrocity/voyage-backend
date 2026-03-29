@@ -26,6 +26,7 @@ import (
 	_ "github.com/zachatrocity/voyage/docs" // Import generated docs
 	"github.com/zachatrocity/voyage/internal/api/handlers"
 	voyagemiddleware "github.com/zachatrocity/voyage/internal/api/middleware"
+	"github.com/zachatrocity/voyage/internal/trips"
 )
 
 // Config holds all configuration for the Voyage API server.
@@ -70,6 +71,14 @@ func main() {
 	}
 	log.Printf("Voyage config: port=%s mail_dir=%s notmuch_config=%s trips_db=%s classifiers=%s sync_cmd=%s api_key=%s",
 		cfg.Port, cfg.MailDir, cfg.NotmuchConfig, cfg.TripsDatabasePath, cfg.ClassifiersPath, cfg.SyncCmd, apiKeyStatus)
+
+	// Initialize trips service
+	tripStore, err := trips.NewJSONStore(cfg.TripsDatabasePath)
+	if err != nil {
+		log.Fatalf("Failed to initialize trip store: %v", err)
+	}
+	tripSvc := trips.NewService(tripStore)
+	tripHandler := handlers.NewTripHandler(tripSvc)
 
 	// Create a new Echo instance
 	e := echo.New()
@@ -130,6 +139,10 @@ func main() {
 
 		// Tag email endpoint
 		v1.POST("/email/:id/tags/:tag", handlers.TagEmail)
+
+		// Trip endpoints
+		v1.GET("/trips", tripHandler.ListTrips)
+		v1.POST("/trips", tripHandler.CreateTrip)
 	}
 
 	// Start the server
