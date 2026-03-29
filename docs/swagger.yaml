@@ -1,5 +1,27 @@
 basePath: /api/v1
 definitions:
+  handlers.createTripRequest:
+    properties:
+      date_range:
+        type: string
+      name:
+        type: string
+    type: object
+  handlers.tripResponse:
+    properties:
+      confirmed_count:
+        type: integer
+      created_at:
+        type: string
+      date_range:
+        type: string
+      email_count:
+        type: integer
+      id:
+        type: string
+      name:
+        type: string
+    type: object
   notmuch.EmailResult:
     description: Email search result
     properties:
@@ -198,4 +220,68 @@ paths:
       summary: Search emails
       tags:
       - search
+  /trips:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all trips
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              items:
+                $ref: '#/definitions/handlers.tripResponse'
+              type: array
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List all trips
+      tags:
+      - trips
+    post:
+      consumes:
+      - application/json
+      description: Create a trip with a name and date range
+      parameters:
+      - description: Trip to create
+        in: body
+        name: trip
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.createTripRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.tripResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a new trip
+      tags:
+      - trips
 swagger: "2.0"
