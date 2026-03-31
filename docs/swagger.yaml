@@ -72,6 +72,10 @@ definitions:
   notmuch.EmailResult:
     description: Email search result
     properties:
+      body_preview:
+        type: string
+      category:
+        type: string
       date:
         example: "2023-01-01T12:00:00Z"
         type: string
@@ -96,6 +100,8 @@ definitions:
         type: array
       thread_id:
         example: thread123
+        type: string
+      trip_id:
         type: string
     type: object
   notmuch.SearchResults:

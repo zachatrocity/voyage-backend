@@ -551,6 +551,12 @@ const docTemplate = `{
             "description": "Email search result",
             "type": "object",
             "properties": {
+                "body_preview": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "string"
+                },
                 "date": {
                     "type": "string",
                     "example": "2023-01-01T12:00:00Z"
@@ -584,6 +590,9 @@ const docTemplate = `{
                 "thread_id": {
                     "type": "string",
                     "example": "thread123"
+                },
+                "trip_id": {
+                    "type": "string"
                 }
             }
         },
