@@ -1,6 +1,5 @@
 # Voyage email category classifiers
-# Edit this file to add your own airlines, hotels, etc.
-# No restart required — loaded on each request (or cached, implementation detail)
+# Override path with VOYAGE_CLASSIFIERS_PATH env var
 categories:
   flight:
     domains:
@@ -13,10 +12,11 @@ categories:
       - jetblue.com
       - frontier.com
     subject_keywords:
-      - flight confirmation
+      - flight
       - eticket
-      - boarding pass
-      - your flight
+      - e-ticket
+      - boarding
+      - confirmation
       - departing
       - arrives
       - itinerary
@@ -25,19 +25,19 @@ categories:
       - marriott.com
       - hilton.com
       - hyatt.com
-      - ihg.com
-      - bestwestern.com
       - airbnb.com
       - vrbo.com
-      - hotels.com
       - booking.com
+      - expedia.com
+      - ihg.com
     subject_keywords:
-      - hotel confirmation
+      - hotel
       - check-in
       - checkout
-      - reservation confirmed
-      - your stay
+      - reservation
+      - stay
       - resort
+      - lodging
   cruise:
     domains:
       - carnival.com
@@ -45,13 +45,14 @@ categories:
       - ncl.com
       - princess.com
       - celebritycruises.com
-      - hollandamerica.com
     subject_keywords:
-      - cruise confirmation
+      - cruise
       - embarkation
+      - port
       - stateroom
       - sailing
-      - port
+      - voyage
+      - ship
   car_rental:
     domains:
       - hertz.com
@@ -61,10 +62,11 @@ categories:
       - nationalcar.com
       - alamo.com
     subject_keywords:
-      - rental confirmation
-      - car reservation
+      - rental
       - pick-up
-      - vehicle reservation
+      - vehicle
+      - car reservation
+      - pickup
   activity:
     domains:
       - disney.com
@@ -73,8 +75,9 @@ categories:
       - viator.com
       - getyourguide.com
     subject_keywords:
-      - ticket confirmation
+      - ticket
       - admission
-      - park ticket
-      - tour confirmation
+      - park
+      - tour
       - experience
+      - booking
