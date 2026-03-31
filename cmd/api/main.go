@@ -26,6 +26,7 @@ import (
 	_ "github.com/zachatrocity/voyage/docs" // Import generated docs
 	"github.com/zachatrocity/voyage/internal/api/handlers"
 	voyagemiddleware "github.com/zachatrocity/voyage/internal/api/middleware"
+	"github.com/zachatrocity/voyage/internal/sync"
 	"github.com/zachatrocity/voyage/internal/trips"
 )
 
@@ -79,6 +80,10 @@ func main() {
 	}
 	tripSvc := trips.NewService(tripStore)
 	tripHandler := handlers.NewTripHandler(tripSvc)
+
+	// Initialize sync manager
+	syncManager := sync.NewSyncManager(cfg.SyncCmd)
+	syncHandler := handlers.NewSyncHandler(syncManager)
 
 	// Create a new Echo instance
 	e := echo.New()
@@ -147,6 +152,10 @@ func main() {
 
 		// Email-trip association endpoint
 		v1.POST("/email/:id/trip/:tripId", tripHandler.AssociateTripEmail)
+
+		// Sync endpoints
+		v1.POST("/sync", syncHandler.TriggerSync)
+		v1.GET("/sync/status", syncHandler.GetSyncStatus)
 	}
 
 	// Start the server
