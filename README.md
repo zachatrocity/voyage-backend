@@ -60,27 +60,26 @@ curl http://localhost:8181/health
 
 ```yaml
 services:
-  # Mail sync sidecar — pulls Gmail via mbsync, indexes with notmuch
+  # Mail sync sidecar — Alpine + mbsync + notmuch
+  # Pulls Gmail on a schedule and writes to a shared maildir
   voyage-mail:
-    image: ghcr.io/zachatrocity/voyage-backend:latest
+    image: ghcr.io/zachatrocity/voyage-mail:latest
     volumes:
       - ./mail:/mail
       - ./config:/config
     environment:
       SYNC_FREQUENCY: "60m"
       EMAIL_PASSWORD: "${EMAIL_PASSWORD}"
-      NOTMUCH_CONFIG: /config/notmuch/config
     restart: unless-stopped
 
+  # API server — Go binary that serves the REST API over the shared maildir
   voyage-api:
     image: ghcr.io/zachatrocity/voyage-backend:latest
     ports:
       - "8181:8181"
     volumes:
-      # Shared maildir with voyage-mail sidecar
       - ./mail:/mail:ro
       - ./config/notmuch/config:/config/notmuch/config:ro
-      # Voyage data files (trips + classifiers) — writable
       - ./trips.json:/app/trips.json
       - ./configs/classifiers.yaml:/app/configs/classifiers.yaml
     environment:
@@ -98,7 +97,7 @@ services:
 
 > **Tip for home servers / Tailscale:** Set `VOYAGE_ALLOWED_ORIGINS` to your device's local IP or Tailscale address, e.g. `http://100.x.x.x:1234`.
 
-> **Local dev (build from source):** Comment out `image:` and uncomment a `build:` block pointing at `Dockerfile.api`.
+> **Local dev (build from source):** Comment out `image:` and use a `build:` block — `Dockerfile.api` for the API, `Dockerfile` for the mail sidecar.
 
 ---
 
