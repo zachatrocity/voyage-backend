@@ -1,10 +1,57 @@
 basePath: /api/v1
 definitions:
+  handlers.TripEmailItem:
+    description: An email associated with a trip
+    properties:
+      date:
+        type: string
+      filename:
+        type: string
+      from:
+        type: string
+      message_id:
+        type: string
+      subject:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      thread_id:
+        type: string
+    type: object
+  handlers.associateTripEmailResponse:
+    properties:
+      message_id:
+        example: <abc123@gmail.com>
+        type: string
+      tags:
+        example:
+        - inbox
+        - trip:2026-cruise
+        - travel
+        items:
+          type: string
+        type: array
+      trip_id:
+        example: 2026-cruise
+        type: string
+    type: object
   handlers.createTripRequest:
     properties:
       date_range:
         type: string
       name:
+        type: string
+    type: object
+  handlers.tripEmailsResponse:
+    properties:
+      emails:
+        items:
+          $ref: '#/definitions/handlers.TripEmailItem'
+        type: array
+      trip_id:
+        example: 2026-cruise
         type: string
     type: object
   handlers.tripResponse:
@@ -161,6 +208,46 @@ paths:
       summary: Tag an email
       tags:
       - email
+  /email/{id}/trip/{tripId}:
+    post:
+      consumes:
+      - application/json
+      description: Remove any existing trip:* tags and apply trip:{tripId} to the
+        email
+      parameters:
+      - description: Email message ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Trip ID
+        in: path
+        name: tripId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.associateTripEmailResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Associate an email with a trip
+      tags:
+      - email
+      - trips
   /health:
     get:
       consumes:
@@ -283,5 +370,39 @@ paths:
             type: object
       summary: Create a new trip
       tags:
+      - trips
+  /trips/{id}/emails:
+    get:
+      consumes:
+      - application/json
+      description: Get all emails tagged with a specific trip, sorted chronologically
+      parameters:
+      - description: Trip ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.tripEmailsResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: List emails for a trip
+      tags:
+      - email
       - trips
 swagger: "2.0"

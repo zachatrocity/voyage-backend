@@ -143,6 +143,10 @@ func main() {
 		// Trip endpoints
 		v1.GET("/trips", tripHandler.ListTrips)
 		v1.POST("/trips", tripHandler.CreateTrip)
+		v1.GET("/trips/:id/emails", tripHandler.ListTripEmails)
+
+		// Email-trip association endpoint
+		v1.POST("/email/:id/trip/:tripId", tripHandler.AssociateTripEmail)
 	}
 
 	// Start the server

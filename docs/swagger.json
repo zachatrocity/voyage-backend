@@ -142,6 +142,64 @@
                 }
             }
         },
+        "/email/{id}/trip/{tripId}": {
+            "post": {
+                "description": "Remove any existing trip:* tags and apply trip:{tripId} to the email",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "email",
+                    "trips"
+                ],
+                "summary": "Associate an email with a trip",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Email message ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Trip ID",
+                        "name": "tripId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.associateTripEmailResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/health": {
             "get": {
                 "description": "Get the health status of the API and database connection",
@@ -326,9 +384,114 @@
                     }
                 }
             }
+        },
+        "/trips/{id}/emails": {
+            "get": {
+                "description": "Get all emails tagged with a specific trip, sorted chronologically",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "email",
+                    "trips"
+                ],
+                "summary": "List emails for a trip",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Trip ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.tripEmailsResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "handlers.TripEmailItem": {
+            "description": "An email associated with a trip",
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "filename": {
+                    "type": "string"
+                },
+                "from": {
+                    "type": "string"
+                },
+                "message_id": {
+                    "type": "string"
+                },
+                "subject": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "thread_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.associateTripEmailResponse": {
+            "type": "object",
+            "properties": {
+                "message_id": {
+                    "type": "string",
+                    "example": "\u003cabc123@gmail.com\u003e"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "inbox",
+                        "trip:2026-cruise",
+                        "travel"
+                    ]
+                },
+                "trip_id": {
+                    "type": "string",
+                    "example": "2026-cruise"
+                }
+            }
+        },
         "handlers.createTripRequest": {
             "type": "object",
             "properties": {
@@ -337,6 +500,21 @@
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "handlers.tripEmailsResponse": {
+            "type": "object",
+            "properties": {
+                "emails": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.TripEmailItem"
+                    }
+                },
+                "trip_id": {
+                    "type": "string",
+                    "example": "2026-cruise"
                 }
             }
         },
