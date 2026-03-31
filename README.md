@@ -56,23 +56,21 @@ curl http://localhost:8181/health
 
 ---
 
-## Docker Compose (full annotated example)
+## Docker Compose
 
 ```yaml
 services:
-  # Mail sync sidecar — Alpine + mbsync + notmuch
-  # Pulls Gmail on a schedule and writes to a shared maildir
+  # Mail sync sidecar — pulls Gmail via mbsync, indexes with notmuch
   voyage-mail:
     image: ghcr.io/zachatrocity/voyage-mail:latest
     volumes:
       - ./mail:/mail
       - ./config:/config
     environment:
-      SYNC_FREQUENCY: "60m"
       EMAIL_PASSWORD: "${EMAIL_PASSWORD}"
     restart: unless-stopped
 
-  # API server — Go binary that serves the REST API over the shared maildir
+  # API server
   voyage-api:
     image: ghcr.io/zachatrocity/voyage-backend:latest
     ports:
@@ -80,22 +78,32 @@ services:
     volumes:
       - ./mail:/mail:ro
       - ./config/notmuch/config:/config/notmuch/config:ro
-      - ./trips.json:/app/trips.json
-      - ./configs/classifiers.yaml:/app/configs/classifiers.yaml
     environment:
-      VOYAGE_PORT: "8181"
-      VOYAGE_MAIL_DIR: /mail
-      VOYAGE_NOTMUCH_CONFIG: /config/notmuch/config
-      VOYAGE_TRIPS_DB: /app/trips.json
-      VOYAGE_CLASSIFIERS: /app/configs/classifiers.yaml
       VOYAGE_API_KEY: "${VOYAGE_API_KEY}"
-      VOYAGE_ALLOWED_ORIGINS: "${VOYAGE_ALLOWED_ORIGINS:-http://localhost:1234}"
     depends_on:
       - voyage-mail
     restart: unless-stopped
 ```
 
-> **Tip for home servers / Tailscale:** Set `VOYAGE_ALLOWED_ORIGINS` to your device's local IP or Tailscale address, e.g. `http://100.x.x.x:1234`.
+### Required `.env` values
+
+| Variable | Description |
+|---|---|
+| `EMAIL_PASSWORD` | Gmail app password for mbsync |
+| `VOYAGE_API_KEY` | API key — generate with `openssl rand -hex 32`. Leave empty to disable auth (trusted local network only). |
+
+### Optional env vars
+
+| Variable | Description | Default |
+|---|---|---|
+| `SYNC_FREQUENCY` | How often to sync mail (`15m`, `1h`, etc.) | `15m` |
+| `VOYAGE_PORT` | Port to listen on | `8181` |
+| `VOYAGE_ALLOWED_ORIGINS` | Comma-separated CORS origins (set to your app's IP/Tailscale address) | *(none)* |
+| `VOYAGE_MAIL_DIR` | Path to Maildir inside container | `/mail` |
+| `VOYAGE_NOTMUCH_CONFIG` | Path to notmuch config inside container | `/config/notmuch/config` |
+| `VOYAGE_TRIPS_DB` | Trips persistence file | `./trips.json` |
+| `VOYAGE_CLASSIFIERS` | Email category rules YAML — falls back to built-in defaults if not mounted | `./configs/classifiers.yaml` |
+| `VOYAGE_SYNC_CMD` | Mail sync command | `./scripts/sync-mail.sh` |
 
 > **Local dev (build from source):** Comment out `image:` and use a `build:` block — `Dockerfile.api` for the API, `Dockerfile` for the mail sidecar.
 
@@ -137,25 +145,6 @@ GET  /docs
 ```
 
 Full interactive docs at `http://localhost:8181/docs`.
-
----
-
-## Configuration
-
-| Variable | Description | Default |
-|---|---|---|
-| `VOYAGE_API_KEY` | API key — **leave empty to disable auth** (trusted local network) | *(none)* |
-| `VOYAGE_PORT` | Port to listen on | `8181` |
-| `VOYAGE_ALLOWED_ORIGINS` | Comma-separated CORS origins | `http://localhost:8080,...` |
-| `VOYAGE_MAIL_DIR` | Path to your Maildir | *(required)* |
-| `VOYAGE_NOTMUCH_CONFIG` | Path to notmuch config | *(required)* |
-| `VOYAGE_TRIPS_DB` | Trips persistence file | `./trips.json` |
-| `VOYAGE_CLASSIFIERS` | Email category rules YAML | `./configs/classifiers.yaml` |
-| `VOYAGE_SYNC_CMD` | Mail sync command | `./scripts/sync-mail.sh` |
-
-### Customizing email categories
-
-Edit `configs/classifiers.yaml` to add your own airlines, hotel chains, or regional carriers. No restart required — or just restart the container. See the file for the full format.
 
 ---
 
