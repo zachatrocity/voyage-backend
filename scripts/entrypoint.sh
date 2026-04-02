@@ -60,12 +60,27 @@ setup_cron() {
     echo "Cron job set up."
 }
 
+# Function to initialize notmuch database if it doesn't exist
+init_notmuch() {
+    if [ ! -d "/mail/.notmuch" ]; then
+        echo "Notmuch database not found. Initializing..."
+        export NOTMUCH_CONFIG=/config/notmuch/config
+        notmuch new
+        echo "Notmuch database initialized."
+    else
+        echo "Notmuch database already exists."
+    fi
+}
+
 # Main execution
 echo "Starting mail service..."
 
 # Check for required configurations
 if check_configs; then
     echo "All required configurations found."
+
+    # Initialize notmuch database if needed
+    init_notmuch
     
     # Setup cron job
     setup_cron
