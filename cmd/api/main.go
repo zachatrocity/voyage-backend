@@ -88,7 +88,8 @@ func main() {
 	e.Use(middleware.Recover())
 
 	// CORS configuration
-	origins := []string{"http://localhost:8080", "http://localhost:1234", "http://localhost:8181"}
+	// Default to wildcard for self-hosted deployments (mobile apps send null/app origin)
+	origins := []string{"*"}
 	if cfg.AllowedOrigins != "" {
 		origins = strings.Split(cfg.AllowedOrigins, ",")
 	}
