@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/zachatrocity/voyage/internal/email"
 	"github.com/zachatrocity/voyage/notmuch"
 )
 
@@ -19,7 +20,10 @@ type EmailResult struct {
 	From      string    `json:"from" example:"sender@example.com"`
 	Subject   string    `json:"subject" example:"Flight Confirmation"`
 	Tags      []string  `json:"tags" example:"travel,flight"`
-	Filename  string    `json:"filename" example:"/path/to/email.eml"`
+	Filename    string    `json:"filename" example:"/path/to/email.eml"`
+	BodyPreview string    `json:"body_preview"`
+	Category    string    `json:"category"`
+	TripID      string    `json:"trip_id,omitempty"`
 }
 
 // SearchResults represents the results of a search query
@@ -169,6 +173,9 @@ func GetEmail(messageID string) (*EmailResult, error) {
 	// Create result using helper function
 	result := createEmailResultFromMessage(msg)
 
+	// Populate body preview from the .eml file
+	result.BodyPreview = email.ExtractBodyPreview(result.Filename, 300)
+
 	return result, nil
 }
 
@@ -315,6 +322,15 @@ func createEmailResultFromMessage(msg *notmuch.Message) *EmailResult {
 		msgTags.MoveToNext()
 	}
 
+	// Extract TripID from trip:* tags
+	var tripID string
+	for _, tag := range tags {
+		if strings.HasPrefix(tag, "trip:") {
+			tripID = strings.TrimPrefix(tag, "trip:")
+			break
+		}
+	}
+
 	// Create result
 	return &EmailResult{
 		MessageID: msg.GetMessageId(),
@@ -324,5 +340,6 @@ func createEmailResultFromMessage(msg *notmuch.Message) *EmailResult {
 		Subject:   msg.GetHeader("subject"),
 		Tags:      tags,
 		Filename:  msg.GetFileName(),
+		TripID:    tripID,
 	}
 }
