@@ -129,3 +129,46 @@ func TestListTrips_AfterCreate(t *testing.T) {
 		t.Errorf("trip id = %v; want 2026-caribbean-cruise", body.Trips[0]["id"])
 	}
 }
+
+func TestDeleteTrip(t *testing.T) {
+	h := newTripHandler(t)
+	e := testutil.NewTestEcho()
+	e.POST("/api/v1/trips", h.CreateTrip)
+	e.DELETE("/api/v1/trips/:id", h.DeleteTrip)
+	e.GET("/api/v1/trips", h.ListTrips)
+
+	req, rec := testutil.NewRequest(http.MethodPost, "/api/v1/trips", map[string]string{
+		"name":       "Delete Me",
+		"date_range": "Any",
+	})
+	e.ServeHTTP(rec, req)
+	testutil.AssertStatus(t, rec, http.StatusCreated)
+
+	req, rec = testutil.NewRequest(http.MethodDelete, "/api/v1/trips/delete-me", nil)
+	e.ServeHTTP(rec, req)
+	testutil.AssertStatus(t, rec, http.StatusNoContent)
+
+	req, rec = testutil.NewRequest(http.MethodGet, "/api/v1/trips", nil)
+	e.ServeHTTP(rec, req)
+	testutil.AssertStatus(t, rec, http.StatusOK)
+
+	var body struct {
+		Trips []map[string]interface{} `json:"trips"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if len(body.Trips) != 0 {
+		t.Fatalf("expected 0 trips after delete, got %d", len(body.Trips))
+	}
+}
+
+func TestDeleteTrip_NotFound(t *testing.T) {
+	h := newTripHandler(t)
+	e := testutil.NewTestEcho()
+	e.DELETE("/api/v1/trips/:id", h.DeleteTrip)
+
+	req, rec := testutil.NewRequest(http.MethodDelete, "/api/v1/trips/does-not-exist", nil)
+	e.ServeHTTP(rec, req)
+	testutil.AssertStatus(t, rec, http.StatusNotFound)
+}

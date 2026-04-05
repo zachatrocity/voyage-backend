@@ -377,6 +377,37 @@ paths:
       summary: Create a new trip
       tags:
       - trips
+  /trips/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a trip by id
+      parameters:
+      - description: Trip ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a trip
+      tags:
+      - trips
   /trips/{id}/emails:
     get:
       consumes:

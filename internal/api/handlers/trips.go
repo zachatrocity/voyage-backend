@@ -109,3 +109,37 @@ func (h *TripHandler) CreateTrip(c echo.Context) error {
 
 	return c.JSON(http.StatusCreated, toTripResponse(t))
 }
+
+// DeleteTrip godoc
+// @Summary Delete a trip
+// @Description Delete a trip by id
+// @Tags trips
+// @Accept json
+// @Produce json
+// @Param id path string true "Trip ID"
+// @Success 204
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /trips/{id} [delete]
+func (h *TripHandler) DeleteTrip(c echo.Context) error {
+	id := strings.TrimSpace(c.Param("id"))
+	if id == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "id is required",
+		})
+	}
+
+	if _, err := h.svc.GetTrip(id); err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error": "trip not found",
+		})
+	}
+
+	if err := h.svc.DeleteTrip(id); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Failed to delete trip: " + err.Error(),
+		})
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}
