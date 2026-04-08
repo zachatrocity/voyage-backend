@@ -149,22 +149,15 @@ func TagEmail(c echo.Context) error {
 		})
 	}
 
-	// Get email details
-	email, err := notmuch.GetEmail(messageID)
-	if err != nil {
-		return respondNotmuchError(c, "Failed to retrieve email", err)
-	}
-
-	// Check if email was found
-	if email == nil {
-		return c.JSON(http.StatusNotFound, map[string]string{
-			"error": "Email not found",
-		})
-	}
-
 	taggedEmail, err := notmuch.TagEmail(messageID, tag)
 	if err != nil {
 		return respondNotmuchError(c, "Failed to tag email", err)
+	}
+
+	if taggedEmail == nil {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error": "Email not found",
+		})
 	}
 
 	return c.JSON(http.StatusOK, taggedEmail)
