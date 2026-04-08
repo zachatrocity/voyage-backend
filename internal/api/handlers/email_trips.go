@@ -65,9 +65,7 @@ func (h *TripHandler) AssociateTripEmail(c echo.Context) error {
 	// Replace trip tags on the email
 	result, err := voyagenotmuch.ReplaceTripTag(messageID, tripID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to update email tags: " + err.Error(),
-		})
+		return respondNotmuchError(c, "Failed to update email tags", err)
 	}
 	if result == nil {
 		return c.JSON(http.StatusNotFound, map[string]string{
@@ -112,9 +110,7 @@ func (h *TripHandler) ListTripEmails(c echo.Context) error {
 	// Search for emails tagged with this trip
 	results, err := voyagenotmuch.Search("tag:trip:"+tripID, "500", voyagenotmuch.SortOldestFirst)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to search emails: " + err.Error(),
-		})
+		return respondNotmuchError(c, "Failed to search emails", err)
 	}
 
 	items := make([]TripEmailItem, 0, len(results.Results))
