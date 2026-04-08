@@ -76,9 +76,7 @@ func Search(c echo.Context) error {
 	// Perform search
 	results, err := notmuch.Search(query, limit, sortType)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to search emails: " + err.Error(),
-		})
+		return respondNotmuchError(c, "Failed to search emails", err)
 	}
 
 	return c.JSON(http.StatusOK, results)
@@ -108,9 +106,7 @@ func GetEmail(c echo.Context) error {
 	// Get email details
 	email, err := notmuch.GetEmail(messageID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to retrieve email: " + err.Error(),
-		})
+		return respondNotmuchError(c, "Failed to retrieve email", err)
 	}
 
 	// Check if email was found
@@ -156,9 +152,7 @@ func TagEmail(c echo.Context) error {
 	// Get email details
 	email, err := notmuch.GetEmail(messageID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to retrieve email: " + err.Error(),
-		})
+		return respondNotmuchError(c, "Failed to retrieve email", err)
 	}
 
 	// Check if email was found
@@ -170,9 +164,7 @@ func TagEmail(c echo.Context) error {
 
 	taggedEmail, err := notmuch.TagEmail(messageID, tag)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to tag email: " + err.Error(),
-		})
+		return respondNotmuchError(c, "Failed to tag email", err)
 	}
 
 	return c.JSON(http.StatusOK, taggedEmail)
