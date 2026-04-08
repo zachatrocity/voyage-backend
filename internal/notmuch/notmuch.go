@@ -391,14 +391,20 @@ func ReplaceTripTag(messageID, newTripID string) (*EmailResult, error) {
 
 	for _, tag := range FilterTripTags(tags) {
 		if st := msg.RemoveTag(tag); st != notmuch.STATUS_SUCCESS {
-			_ = msg.Thaw()
-			return nil, operationError("replace_trip_tag_remove_existing", "notmuch_remove_tag_failed", st == notmuch.STATUS_XAPIAN_EXCEPTION, fmt.Errorf("failed to remove tag %q: %s", tag, st))
+			cause := fmt.Errorf("failed to remove tag %q: %s", tag, st)
+			if thawStatus := msg.Thaw(); thawStatus != notmuch.STATUS_SUCCESS {
+				cause = fmt.Errorf("%w (also failed to thaw after remove: %s)", cause, thawStatus)
+			}
+			return nil, operationError("replace_trip_tag_remove_existing", "notmuch_remove_tag_failed", st == notmuch.STATUS_XAPIAN_EXCEPTION, cause)
 		}
 	}
 
 	if st := msg.AddTag("trip:" + newTripID); st != notmuch.STATUS_SUCCESS {
-		_ = msg.Thaw()
-		return nil, operationError("replace_trip_tag_add_new", "notmuch_add_tag_failed", st == notmuch.STATUS_XAPIAN_EXCEPTION, fmt.Errorf("failed to add new trip tag: %s", st))
+		cause := fmt.Errorf("failed to add new trip tag: %s", st)
+		if thawStatus := msg.Thaw(); thawStatus != notmuch.STATUS_SUCCESS {
+			cause = fmt.Errorf("%w (also failed to thaw after add: %s)", cause, thawStatus)
+		}
+		return nil, operationError("replace_trip_tag_add_new", "notmuch_add_tag_failed", st == notmuch.STATUS_XAPIAN_EXCEPTION, cause)
 	}
 
 	if st := msg.Thaw(); st != notmuch.STATUS_SUCCESS {
