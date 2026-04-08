@@ -53,6 +53,10 @@ index:
 swagger:
     swag init -g cmd/api/main.go
 
+# Run Hurl integration tests against deployed backend configured in tests/hurl/.env
+hurl:
+    ./scripts/run-hurl.sh
+
 # Rebuild and restart the containers
 restart: down build up
     just logs
