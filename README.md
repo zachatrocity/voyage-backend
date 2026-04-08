@@ -161,6 +161,35 @@ go run ./cmd/api
 
 ---
 
+## Hurl integration tests (against deployed backend)
+
+These tests are designed to run against a real deployed backend using your own API key.
+
+1. Copy env template:
+
+```bash
+cp tests/hurl/.env.example tests/hurl/.env
+```
+
+2. Edit `tests/hurl/.env` with your real values (`BASE_URL`, `API_KEY`).
+
+3. Run tests:
+
+```bash
+./scripts/run-hurl.sh
+```
+
+What it covers right now:
+- health check
+- search + get email
+- basic tag flow
+- trip create/associate/list/delete flow
+- negative cases (400/404)
+
+> `tests/hurl/.env` is gitignored so you can safely keep machine-specific/test secrets locally.
+
+---
+
 ## Architecture
 
 ```
