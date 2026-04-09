@@ -659,6 +659,9 @@ const docTemplate = `{
                 "body": {
                     "type": "string"
                 },
+                "html_body": {
+                    "type": "string"
+                },
                 "message_id": {
                     "type": "string"
                 }
