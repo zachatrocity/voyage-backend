@@ -16,6 +16,7 @@ Required vars:
 Optional vars:
 - `SEARCH_QUERY` (default `*`)
 - `RUN_ID` (default: current epoch seconds)
+- `RUN_MUTATION` (`0` default, set `1` to run trip create/associate/delete flow)
 
 ## Run
 
@@ -29,3 +30,4 @@ Optional vars:
 - `02-email-tag-flow.hurl` — search/get/tag smoke flow
 - `03-trip-flow.hurl` — create/associate/list/delete trip flow
 - `04-negative-cases.hurl` — basic error-path assertions
+ assertions

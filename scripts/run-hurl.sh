@@ -34,9 +34,17 @@ COMMON_ARGS=(
 echo "Running Hurl integration tests against: $BASE_URL"
 echo "Run ID: $RUN_ID"
 
+RUN_MUTATION="${RUN_MUTATION:-0}"
+
 hurl "${COMMON_ARGS[@]}" "$ROOT_DIR/tests/hurl/01-health.hurl"
 hurl "${COMMON_ARGS[@]}" "$ROOT_DIR/tests/hurl/02-email-tag-flow.hurl"
-hurl "${COMMON_ARGS[@]}" "$ROOT_DIR/tests/hurl/03-trip-flow.hurl"
 hurl "${COMMON_ARGS[@]}" "$ROOT_DIR/tests/hurl/04-negative-cases.hurl"
 
-echo "All Hurl integration tests passed."
+if [[ "$RUN_MUTATION" == "1" ]]; then
+  echo "RUN_MUTATION=1 -> running trip create/associate/delete flow"
+  hurl "${COMMON_ARGS[@]}" "$ROOT_DIR/tests/hurl/03-trip-flow.hurl"
+else
+  echo "Skipping mutating trip flow (set RUN_MUTATION=1 to enable)."
+fi
+
+echo "Hurl integration tests passed."

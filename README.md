@@ -182,11 +182,12 @@ cp tests/hurl/.env.example tests/hurl/.env
 What it covers right now:
 - health check
 - search + get email
-- basic tag flow
-- trip create/associate/list/delete flow
+- basic tag flow (re-applies an existing tag; low-mutation)
 - negative cases (400/404)
+- optional mutating trip create/associate/list/delete flow (`RUN_MUTATION=1`)
 
 > `tests/hurl/.env` is gitignored so you can safely keep machine-specific/test secrets locally.
+> By default, mutating trip tests are skipped to avoid creating test noise on your live backend.
 
 ---
 
