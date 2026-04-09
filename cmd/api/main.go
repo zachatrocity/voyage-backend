@@ -26,6 +26,7 @@ import (
 	_ "github.com/zachatrocity/voyage/docs" // Import generated docs
 	"github.com/zachatrocity/voyage/internal/api/handlers"
 	voyagemiddleware "github.com/zachatrocity/voyage/internal/api/middleware"
+	"github.com/zachatrocity/voyage/internal/classifier"
 	"github.com/zachatrocity/voyage/internal/trips"
 )
 
@@ -72,6 +73,11 @@ func main() {
 	log.Printf("Voyage config: port=%s mail_dir=%s notmuch_config=%s trips_db=%s classifiers=%s sync_cmd=%s api_key=%s",
 		cfg.Port, cfg.MailDir, cfg.NotmuchConfig, cfg.TripsDatabasePath, cfg.ClassifiersPath, cfg.SyncCmd, apiKeyStatus)
 
+	// Initialize classifier config (inject path from config, falls back to env/defaults)
+	if err := classifier.SetConfigPath(cfg.ClassifiersPath); err != nil {
+		log.Printf("Warning: failed to load classifiers from %q: %v (using built-in defaults)", cfg.ClassifiersPath, err)
+	}
+
 	// Initialize trips service
 	tripStore, err := trips.NewJSONStore(cfg.TripsDatabasePath)
 	if err != nil {
@@ -95,7 +101,7 @@ func main() {
 	}
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: origins,
-		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodOptions},
+		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions},
 		AllowHeaders: []string{echo.HeaderContentType, echo.HeaderAccept, "X-API-Key"},
 	}))
 
@@ -150,6 +156,11 @@ func main() {
 
 		// Email-trip association endpoint
 		v1.POST("/email/:id/trip/:tripId", tripHandler.AssociateTripEmail)
+
+		// Classifier endpoints
+		v1.GET("/classifiers", handlers.GetClassifiers)
+		v1.PUT("/classifiers", handlers.UpdateClassifiers)
+		v1.POST("/classifiers/reset", handlers.ResetClassifiers)
 	}
 
 	// Start the server
