@@ -72,6 +72,7 @@ type EmailResult struct {
 type EmailContentResponse struct {
 	MessageID string `json:"message_id"`
 	Body      string `json:"body"`
+	HTMLBody  string `json:"html_body,omitempty"`
 }
 
 // SearchResults represents the results of a search query
@@ -296,6 +297,7 @@ func GetEmailContent(messageID string) (*EmailContentResponse, error) {
 	return &EmailContentResponse{
 		MessageID: base.MessageID,
 		Body:      email.ExtractBodyFull(base.Filename),
+		HTMLBody:  email.ExtractBodyHTML(base.Filename),
 	}, nil
 }
 
