@@ -17,6 +17,109 @@
     "host": "localhost:8181",
     "basePath": "/api/v1",
     "paths": {
+        "/classifiers": {
+            "get": {
+                "description": "Returns the current classifier configuration (categories, domains, keywords)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "classifiers"
+                ],
+                "summary": "Get classifier config",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/classifier.ClassifiersConfig"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Replaces the classifier configuration. Validates input and persists to YAML file.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "classifiers"
+                ],
+                "summary": "Update classifier config",
+                "parameters": [
+                    {
+                        "description": "Classifier config",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/classifier.ClassifiersConfig"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/classifier.ClassifiersConfig"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/classifiers/reset": {
+            "post": {
+                "description": "Restores the built-in default classifier configuration and persists it to the YAML file.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "classifiers"
+                ],
+                "summary": "Reset classifier config to defaults",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/classifier.ClassifiersConfig"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/email/{id}": {
             "get": {
                 "description": "Retrieve a single email by its message ID",
@@ -544,6 +647,34 @@
         }
     },
     "definitions": {
+        "classifier.CategoryRule": {
+            "type": "object",
+            "properties": {
+                "domains": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "subject_keywords": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "classifier.ClassifiersConfig": {
+            "type": "object",
+            "properties": {
+                "categories": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/classifier.CategoryRule"
+                    }
+                }
+            }
+        },
         "handlers.TripEmailItem": {
             "description": "An email associated with a trip",
             "type": "object",

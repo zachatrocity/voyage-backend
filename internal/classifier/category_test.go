@@ -94,6 +94,7 @@ func TestDetectCategory_CustomConfigFile(t *testing.T) {
 	if err := os.WriteFile(cfgPath, []byte(content), 0644); err != nil {
 		t.Fatal(err)
 	}
+	SetConfigPath("")
 	t.Setenv("VOYAGE_CLASSIFIERS_PATH", cfgPath)
 
 	got := DetectCategory("anything", "info@customair.com")
