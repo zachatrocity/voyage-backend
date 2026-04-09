@@ -258,7 +258,7 @@ func GetEmail(messageID string) (*EmailResult, error) {
 	if status != notmuch.STATUS_SUCCESS {
 		return nil, operationError("get_email_find_message", "notmuch_find_message_failed", status == notmuch.STATUS_XAPIAN_EXCEPTION, fmt.Errorf("failed to find message: %s", status))
 	}
-	if msg == nil {
+	if msg == nil || msg.GetMessageId() == "" {
 		return nil, nil
 	}
 	defer msg.Destroy()
@@ -281,7 +281,7 @@ func TagEmail(messageID string, tag string) (*EmailResult, error) {
 	if status != notmuch.STATUS_SUCCESS {
 		return nil, operationError("tag_email_find_message", "notmuch_find_message_failed", status == notmuch.STATUS_XAPIAN_EXCEPTION, fmt.Errorf("failed to find message: %s", status))
 	}
-	if msg == nil {
+	if msg == nil || msg.GetMessageId() == "" {
 		return nil, nil
 	}
 	defer msg.Destroy()
@@ -307,7 +307,7 @@ func RemoveTag(messageID string, tag string) (*EmailResult, error) {
 	if status != notmuch.STATUS_SUCCESS {
 		return nil, operationError("remove_tag_find_message", "notmuch_find_message_failed", status == notmuch.STATUS_XAPIAN_EXCEPTION, fmt.Errorf("failed to find message: %s", status))
 	}
-	if msg == nil {
+	if msg == nil || msg.GetMessageId() == "" {
 		return nil, nil
 	}
 	defer msg.Destroy()
@@ -333,7 +333,7 @@ func GetEmailTags(messageID string) ([]string, error) {
 	if status != notmuch.STATUS_SUCCESS {
 		return nil, operationError("get_email_tags_find_message", "notmuch_find_message_failed", status == notmuch.STATUS_XAPIAN_EXCEPTION, fmt.Errorf("failed to find message: %s", status))
 	}
-	if msg == nil {
+	if msg == nil || msg.GetMessageId() == "" {
 		return nil, nil
 	}
 	defer msg.Destroy()
@@ -373,7 +373,7 @@ func ReplaceTripTag(messageID, newTripID string) (*EmailResult, error) {
 	if status != notmuch.STATUS_SUCCESS {
 		return nil, operationError("replace_trip_tag_find_message", "notmuch_find_message_failed", status == notmuch.STATUS_XAPIAN_EXCEPTION, fmt.Errorf("failed to find message: %s", status))
 	}
-	if msg == nil {
+	if msg == nil || msg.GetMessageId() == "" {
 		return nil, nil
 	}
 	defer msg.Destroy()
