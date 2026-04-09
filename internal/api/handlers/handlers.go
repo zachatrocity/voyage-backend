@@ -124,6 +124,44 @@ func GetEmail(c echo.Context) error {
 	return c.JSON(http.StatusOK, email)
 }
 
+// GetEmailContent godoc
+// @Summary Get full email content by ID
+// @Description Retrieve full normalized email body by message ID
+// @Tags email
+// @Accept json
+// @Produce json
+// @Param id path string true "Message ID"
+// @Success 200 {object} notmuch.EmailContentResponse
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /email/{id}/content [get]
+func GetEmailContent(c echo.Context) error {
+	messageID := c.Param("id")
+	if messageID == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Message ID is required",
+		})
+	}
+	if !isLikelyMessageID(messageID) {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Message ID format is invalid",
+		})
+	}
+
+	content, err := notmuch.GetEmailContent(messageID)
+	if err != nil {
+		return respondNotmuchError(c, "Failed to retrieve email content", err)
+	}
+	if content == nil {
+		return c.JSON(http.StatusNotFound, map[string]string{
+			"error": "Email not found",
+		})
+	}
+
+	return c.JSON(http.StatusOK, content)
+}
+
 // TagEmail godoc
 // @Summary Tag an email
 // @Description Add a tag to an email by its message ID

@@ -68,6 +68,12 @@ type EmailResult struct {
 	TripID      string    `json:"trip_id,omitempty"`
 }
 
+// EmailContentResponse represents full email body content for detail views.
+type EmailContentResponse struct {
+	MessageID string `json:"message_id"`
+	Body      string `json:"body"`
+}
+
 // SearchResults represents the results of a search query
 // @Description Search results containing matching emails
 type SearchResults struct {
@@ -267,6 +273,30 @@ func GetEmail(messageID string) (*EmailResult, error) {
 	result.BodyPreview = email.ExtractBodyPreview(result.Filename, 300)
 
 	return result, nil
+}
+
+// GetEmailContent retrieves full normalized email body text by message ID.
+func GetEmailContent(messageID string) (*EmailContentResponse, error) {
+	db, err := openDatabase(notmuch.DATABASE_MODE_READ_ONLY, "get_email_content_open")
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	msg, status := db.FindMessage(messageID)
+	if status != notmuch.STATUS_SUCCESS {
+		return nil, operationError("get_email_content_find_message", "notmuch_find_message_failed", status == notmuch.STATUS_XAPIAN_EXCEPTION, fmt.Errorf("failed to find message: %s", status))
+	}
+	if msg == nil || msg.GetMessageId() == "" {
+		return nil, nil
+	}
+	defer msg.Destroy()
+
+	base := createEmailResultFromMessage(msg)
+	return &EmailContentResponse{
+		MessageID: base.MessageID,
+		Body:      email.ExtractBodyFull(base.Filename),
+	}, nil
 }
 
 // TagEmail sets a tag on a particular messageID email
