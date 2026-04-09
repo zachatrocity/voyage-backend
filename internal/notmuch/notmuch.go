@@ -424,9 +424,11 @@ func createEmailResultFromMessage(msg *notmuch.Message) *EmailResult {
 	// Get tags
 	tags := []string{}
 	msgTags := msg.GetTags()
-	for msgTags.Valid() {
-		tags = append(tags, msgTags.Get())
-		msgTags.MoveToNext()
+	if msgTags != nil {
+		for msgTags.Valid() {
+			tags = append(tags, msgTags.Get())
+			msgTags.MoveToNext()
+		}
 	}
 
 	// Extract TripID from trip:* tags

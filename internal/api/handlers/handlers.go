@@ -102,6 +102,11 @@ func GetEmail(c echo.Context) error {
 			"error": "Message ID is required",
 		})
 	}
+	if !isLikelyMessageID(messageID) {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Message ID format is invalid",
+		})
+	}
 
 	// Get email details
 	email, err := notmuch.GetEmail(messageID)
@@ -138,6 +143,11 @@ func TagEmail(c echo.Context) error {
 	if messageID == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{
 			"error": "Message ID is required",
+		})
+	}
+	if !isLikelyMessageID(messageID) {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Message ID format is invalid",
 		})
 	}
 

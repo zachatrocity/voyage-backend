@@ -15,7 +15,7 @@ func TestAssociateTripEmail_TripNotFound(t *testing.T) {
 	e := testutil.NewTestEcho()
 	e.POST("/api/v1/email/:id/trip/:tripId", h.AssociateTripEmail)
 
-	req, rec := testutil.NewRequest(http.MethodPost, "/api/v1/email/abc123/trip/nonexistent-trip", nil)
+	req, rec := testutil.NewRequest(http.MethodPost, "/api/v1/email/abc123@example.invalid/trip/nonexistent-trip", nil)
 	e.ServeHTTP(rec, req)
 
 	testutil.AssertStatus(t, rec, http.StatusNotFound)
@@ -37,7 +37,7 @@ func TestAssociateTripEmail_RouteParams(t *testing.T) {
 	e := testutil.NewTestEcho()
 	e.POST("/api/v1/email/:id/trip/:tripId", h.AssociateTripEmail)
 
-	req, rec := testutil.NewRequest(http.MethodPost, "/api/v1/email/msg-123/trip/test-trip", nil)
+	req, rec := testutil.NewRequest(http.MethodPost, "/api/v1/email/msg-123@example.invalid/trip/test-trip", nil)
 	e.ServeHTTP(rec, req)
 
 	// We expect a 500 (notmuch DB not available) rather than 404,
