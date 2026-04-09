@@ -4,3 +4,5 @@
 
 mail/
 config/
+
+tests/hurl/.env
