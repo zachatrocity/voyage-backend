@@ -26,6 +26,7 @@ import (
 	_ "github.com/zachatrocity/voyage/docs" // Import generated docs
 	"github.com/zachatrocity/voyage/internal/api/handlers"
 	voyagemiddleware "github.com/zachatrocity/voyage/internal/api/middleware"
+	"github.com/zachatrocity/voyage/internal/classifier"
 	"github.com/zachatrocity/voyage/internal/trips"
 )
 
@@ -79,6 +80,7 @@ func main() {
 	}
 	tripSvc := trips.NewService(tripStore)
 	tripHandler := handlers.NewTripHandler(tripSvc)
+	classifier.SetConfigPath(cfg.ClassifiersPath)
 
 	// Create a new Echo instance
 	e := echo.New()
@@ -95,7 +97,7 @@ func main() {
 	}
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: origins,
-		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodOptions},
+		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete, http.MethodOptions},
 		AllowHeaders: []string{echo.HeaderContentType, echo.HeaderAccept, "X-API-Key"},
 	}))
 
@@ -141,6 +143,11 @@ func main() {
 
 		// Tag email endpoint
 		v1.POST("/email/:id/tags/:tag", handlers.TagEmail)
+
+		// Classifier endpoints
+		v1.GET("/classifiers", handlers.GetClassifiers)
+		v1.PUT("/classifiers", handlers.UpdateClassifiers)
+		v1.POST("/classifiers/reset", handlers.ResetClassifiers)
 
 		// Trip endpoints
 		v1.GET("/trips", tripHandler.ListTrips)
