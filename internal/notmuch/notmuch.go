@@ -13,11 +13,8 @@ import (
 )
 
 const (
-	readOnlyDBOpenMaxAttempts = 3
-	readOnlyDBOpenRetryDelay  = 150 * time.Millisecond
-
-	readWriteDBOpenMaxAttempts = 10
-	readWriteDBOpenRetryDelay  = 300 * time.Millisecond
+	dbOpenMaxAttempts = 3
+	dbOpenRetryDelay  = 150 * time.Millisecond
 )
 
 // OperationError is a structured backend error for notmuch operations.
@@ -91,19 +88,11 @@ func GetDatabasePath() string {
 	return "/mail"
 }
 
-func dbOpenRetryConfig(mode notmuch.DatabaseMode) (maxAttempts int, retryDelay time.Duration) {
-	if mode == notmuch.DATABASE_MODE_READ_WRITE {
-		return readWriteDBOpenMaxAttempts, readWriteDBOpenRetryDelay
-	}
-	return readOnlyDBOpenMaxAttempts, readOnlyDBOpenRetryDelay
-}
-
 func openDatabase(mode notmuch.DatabaseMode, operation string) (*notmuch.Database, error) {
 	dbPath := GetDatabasePath()
-	maxAttempts, retryDelay := dbOpenRetryConfig(mode)
 	var lastStatus notmuch.Status
 
-	for attempt := 1; attempt <= maxAttempts; attempt++ {
+	for attempt := 1; attempt <= dbOpenMaxAttempts; attempt++ {
 		db, status := notmuch.OpenDatabase(dbPath, mode)
 		if status == notmuch.STATUS_SUCCESS {
 			return db, nil
@@ -114,8 +103,8 @@ func openDatabase(mode notmuch.DatabaseMode, operation string) (*notmuch.Databas
 			break
 		}
 
-		if attempt < maxAttempts {
-			time.Sleep(time.Duration(attempt) * retryDelay)
+		if attempt < dbOpenMaxAttempts {
+			time.Sleep(time.Duration(attempt) * dbOpenRetryDelay)
 		}
 	}
 
