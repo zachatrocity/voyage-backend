@@ -49,6 +49,12 @@ func (h *TripHandler) AssociateTripEmail(c echo.Context) error {
 	messageID := c.Param("id")
 	tripID := c.Param("tripId")
 
+	if !isLikelyMessageID(messageID) {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Message ID format is invalid",
+		})
+	}
+
 	// Validate trip exists
 	_, err := h.svc.GetTrip(tripID)
 	if err != nil {
