@@ -19,6 +19,16 @@ var htmlTagRe = regexp.MustCompile(`<[^>]*>`)
 // extracts plain text (fallback to HTML with tags stripped), truncates to maxLen chars.
 // Returns empty string (not error) if parsing fails.
 func ExtractBodyPreview(filename string, maxLen int) string {
+	return truncate(extractBodyText(filename), maxLen)
+}
+
+// ExtractBodyFull reads the .eml file and returns the full normalized body text.
+// Returns empty string (not error) if parsing fails.
+func ExtractBodyFull(filename string) string {
+	return extractBodyText(filename)
+}
+
+func extractBodyText(filename string) string {
 	f, err := os.Open(filename)
 	if err != nil {
 		return ""
@@ -39,7 +49,7 @@ func ExtractBodyPreview(filename string, maxLen int) string {
 	if err != nil {
 		// Try reading body as plain text
 		body, _ := io.ReadAll(msg.Body)
-		return truncate(cleanText(string(body)), maxLen)
+		return cleanText(string(body))
 	}
 
 	var text string
@@ -54,7 +64,7 @@ func ExtractBodyPreview(filename string, maxLen int) string {
 		}
 	}
 
-	return truncate(cleanText(text), maxLen)
+	return cleanText(text)
 }
 
 func extractFromMultipart(r io.Reader, boundary string) string {

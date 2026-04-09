@@ -135,8 +135,9 @@ func main() {
 		// Search endpoint
 		v1.GET("/search", handlers.Search)
 
-		// Email endpoint
+		// Email endpoints
 		v1.GET("/email/:id", handlers.GetEmail)
+		v1.GET("/email/:id/content", handlers.GetEmailContent)
 
 		// Tag email endpoint
 		v1.POST("/email/:id/tags/:tag", handlers.TagEmail)
