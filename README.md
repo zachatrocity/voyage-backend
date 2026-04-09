@@ -78,8 +78,10 @@ services:
     volumes:
       - ./mail:/mail:ro
       - ./config/notmuch/config:/config/notmuch/config:ro
+      - ./data/trips.json:/data/trips.json
     environment:
       VOYAGE_API_KEY: "${VOYAGE_API_KEY}"
+      VOYAGE_TRIPS_DB: /data/trips.json
     depends_on:
       - voyage-mail
     restart: unless-stopped
@@ -91,6 +93,9 @@ services:
 |---|---|
 | `EMAIL_PASSWORD` | Gmail app password for mbsync |
 | `VOYAGE_API_KEY` | API key — generate with `openssl rand -hex 32`. Leave empty to disable auth (trusted local network only). |
+
+> **Required persistence:** You must mount `VOYAGE_TRIPS_DB` to a host volume/file (example above uses `./data/trips.json:/data/trips.json`).
+> If you do not mount it, trip data will reset on container restart/redeploy.
 
 ### Optional env vars
 
