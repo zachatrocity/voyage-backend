@@ -37,6 +37,24 @@ definitions:
         example: 2026-cruise
         type: string
     type: object
+  handlers.classifierCategoryJSON:
+    properties:
+      domains:
+        items:
+          type: string
+        type: array
+      subject_keywords:
+        items:
+          type: string
+        type: array
+    type: object
+  handlers.classifiersResponse:
+    properties:
+      categories:
+        additionalProperties:
+          $ref: '#/definitions/handlers.classifierCategoryJSON'
+        type: object
+    type: object
   handlers.createTripRequest:
     properties:
       date_range:
@@ -140,6 +158,77 @@ info:
   title: Voyage API
   version: "1.0"
 paths:
+  /classifiers:
+    get:
+      consumes:
+      - application/json
+      description: Returns the current classifier configuration (categories, domains,
+        keywords)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.classifiersResponse'
+      summary: Get classifier config
+      tags:
+      - classifiers
+    put:
+      consumes:
+      - application/json
+      description: Replaces the classifier configuration. Validates input and persists
+        to YAML file.
+      parameters:
+      - description: Classifier config
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.classifiersResponse'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.classifiersResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update classifier config
+      tags:
+      - classifiers
+  /classifiers/reset:
+    post:
+      consumes:
+      - application/json
+      description: Restores the built-in default classifier configuration and persists
+        it to the YAML file.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.classifiersResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Reset classifier config to defaults
+      tags:
+      - classifiers
   /email/{id}:
     get:
       consumes:
