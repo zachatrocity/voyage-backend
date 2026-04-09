@@ -69,6 +69,13 @@ definitions:
       name:
         type: string
     type: object
+  notmuch.EmailContentResponse:
+    properties:
+      body:
+        type: string
+      message_id:
+        type: string
+    type: object
   notmuch.EmailResult:
     description: Email search result
     properties:
@@ -168,6 +175,45 @@ paths:
               type: string
             type: object
       summary: Get email by ID
+      tags:
+      - email
+  /email/{id}/content:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve full normalized email body by message ID
+      parameters:
+      - description: Message ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/notmuch.EmailContentResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get full email content by ID
       tags:
       - email
   /email/{id}/tags/{tag}:
