@@ -17,6 +17,10 @@ definitions:
         additionalProperties:
           $ref: '#/definitions/classifier.CategoryRule'
         type: object
+      category_titles:
+        additionalProperties:
+          type: string
+        type: object
     type: object
   handlers.TripEmailItem:
     description: An email associated with a trip
