@@ -31,12 +31,25 @@ type CategoryRule struct {
 
 // ClassifiersConfig defines all classifier categories and their matching rules.
 type ClassifiersConfig struct {
-	Categories map[string]CategoryRule `json:"categories" yaml:"categories"`
+	Categories     map[string]CategoryRule `json:"categories" yaml:"categories"`
+	CategoryTitles map[string]string       `json:"category_titles,omitempty" yaml:"category_titles,omitempty"`
 }
 
 var categoryPriority = []string{"cruise", "car_rental", "hotel", "activity", "flight"}
 
+func defaultCategoryTitles() map[string]string {
+	return map[string]string{
+		"flight":     "Flights ✈️",
+		"hotel":      "Hotels 🏨",
+		"car_rental": "Car Rental 🚗",
+		"cruise":     "Cruises 🚢",
+		"activity":   "Activities 🎟️",
+		"other":      "Other 📧",
+	}
+}
+
 var defaultConfig = ClassifiersConfig{
+	CategoryTitles: defaultCategoryTitles(),
 	Categories: map[string]CategoryRule{
 		"flight": {
 			Domains:         []string{"delta.com", "united.com", "aa.com", "southwest.com", "alaskaair.com", "spirit.com", "jetblue.com", "frontier.com"},
@@ -97,7 +110,10 @@ func resolveConfigPath() string {
 }
 
 func cloneConfig(cfg ClassifiersConfig) ClassifiersConfig {
-	out := ClassifiersConfig{Categories: make(map[string]CategoryRule, len(cfg.Categories))}
+	out := ClassifiersConfig{
+		Categories:     make(map[string]CategoryRule, len(cfg.Categories)),
+		CategoryTitles: make(map[string]string, len(cfg.CategoryTitles)),
+	}
 	for k, v := range cfg.Categories {
 		rule := CategoryRule{
 			Domains:         append([]string(nil), v.Domains...),
@@ -105,11 +121,17 @@ func cloneConfig(cfg ClassifiersConfig) ClassifiersConfig {
 		}
 		out.Categories[k] = rule
 	}
+	for k, v := range cfg.CategoryTitles {
+		out.CategoryTitles[k] = v
+	}
 	return out
 }
 
 func normalizeConfig(cfg ClassifiersConfig) ClassifiersConfig {
-	out := ClassifiersConfig{Categories: make(map[string]CategoryRule, len(cfg.Categories))}
+	out := ClassifiersConfig{
+		Categories:     make(map[string]CategoryRule, len(cfg.Categories)),
+		CategoryTitles: make(map[string]string),
+	}
 	for category, rule := range cfg.Categories {
 		name := strings.TrimSpace(strings.ToLower(category))
 		if name == "" {
@@ -145,6 +167,21 @@ func normalizeConfig(cfg ClassifiersConfig) ClassifiersConfig {
 
 		out.Categories[name] = normRule
 	}
+
+	defaultTitles := defaultCategoryTitles()
+	for key := range out.Categories {
+		if title, ok := cfg.CategoryTitles[key]; ok {
+			t := strings.TrimSpace(title)
+			if t != "" {
+				out.CategoryTitles[key] = t
+				continue
+			}
+		}
+		if defaultTitle, ok := defaultTitles[key]; ok {
+			out.CategoryTitles[key] = defaultTitle
+		}
+	}
+
 	return out
 }
 

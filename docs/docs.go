@@ -678,6 +678,12 @@ const docTemplate = `{
                     "additionalProperties": {
                         "$ref": "#/definitions/classifier.CategoryRule"
                     }
+                },
+                "category_titles": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 }
             }
         },
