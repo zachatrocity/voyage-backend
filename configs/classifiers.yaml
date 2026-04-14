@@ -1,5 +1,12 @@
 # Voyage email category classifiers
 # Override path with VOYAGE_CLASSIFIERS_PATH env var
+category_titles:
+  flight: "Flights ✈️"
+  hotel: "Hotels 🏨"
+  cruise: "Cruises 🚢"
+  car_rental: "Car Rental 🚗"
+  activity: "Activities 🎟️"
+  other: "Other 📧"
 categories:
   flight:
     domains:
